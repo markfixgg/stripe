@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Buy cool new product</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?version=3.52.1&features=fetch"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+  </head>
+  <body>
+    <section>
+      <div class="product">
+        <img
+          id="product_img"
+          src=""
+          alt="image"
+        />
+        <div class="description">
+          <h3 id="product_name"></h3>
+          <h5 id="product_price"></h5>
+        </div>
+      </div>
+      <button type="button" id="checkout-button">Checkout</button>
+    </section>
+    
+  </body>
+  <script type="text/javascript">
+function parseQuery(search) {
+
+    var args = search.substring(1).split('&');
+
+    var argsParsed = {};
+
+    var i, arg, kvp, key, value;
+
+    for (i=0; i < args.length; i++) {
+
+        arg = args[i];
+
+        if (-1 === arg.indexOf('=')) {
+
+            argsParsed[decodeURIComponent(arg).trim()] = true;
+        }
+        else {
+
+            kvp = arg.split('=');
+
+            key = decodeURIComponent(kvp[0]).trim();
+
+            value = decodeURIComponent(kvp[1]).trim();
+
+            argsParsed[key] = value;
+        }
+    }
+
+    return argsParsed;
+}
+
+    const params = parseQuery(document.location.search);
+    const json = JSON.parse(params.products);
+    const parsed = {...json[0], price: Math.round(json[0].price) * 100}
+    const product = parsed;
+  
+    const {currency, images, name, price, quantity} = product;
+
+    console.log(parsed)
+
+    document.getElementById("product_img").src=images;
+    document.getElementById("product_name").innerHTML = name;
+    document.getElementById("product_price").innerHTML = `$${price / 100}`; // $20.00
+
+
+    // Create an instance of the Stripe object with your publishable API key
+    var stripe = Stripe("pk_test_51Iihs2Ejd6iefFvJZiqiMePDlDdKtzCyI8LhJPP14MOtN0SBMS4APlaAWpaNWx36l2JJ5nwxJHw9frjyZZrSWrYU002ABQipLZ");
+    var checkoutButton = document.getElementById("checkout-button");
+
+    checkoutButton.addEventListener("click", async function () {
+      await fetch("http://my-vs.ru:3000/create-checkout-session", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({items: [parsed]})
+      })
+        .then(function (response) {
+          return response.json();
+        })
+        .then(function (session) {
+          return stripe.redirectToCheckout({ sessionId: session.id });
+        })
+        .then(function (result) {
+          // If redirectToCheckout fails due to a browser or network
+          // error, you should display the localized error message to your
+          // customer using error.message.
+          if (result.error) {
+            alert(result.error.message);
+          }
+        })
+        .catch(function (error) {
+          console.error("Error:", error);
+        });
+    });
+  </script>
+</html>
