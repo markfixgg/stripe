@@ -1,5 +1,6 @@
 const stripe = require('stripe')('sk_test_51Iihs2Ejd6iefFvJhl8bJ1KjvsEO87QmtDaci0X5wp57VRs3sTdMHWT4bF8VkqXSz1wPqDdOZmWUzRLe5F5eT8Xx006DOogXol');
 const { YOUR_DOMAIN } = config;
+
 const createOrder = async (req, res) => {
     // console.log(req.body)
     // try {
@@ -31,7 +32,7 @@ const createOrder = async (req, res) => {
         line_items.push(line)
     })
 
-    if(line_items.length == 0) return res.send({success: false, err: "Empty items list!"})
+    if(line_items.length == 0) return res.send({success: false, err: "Empty line_items!"})
 
     const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
@@ -44,4 +45,28 @@ const createOrder = async (req, res) => {
       res.json({ id: session.id });
 }
 
-module.exports = {createOrder};
+const calculateOrderAmount = async items => {
+  var total = 0;
+  for(item of items){
+    const price = await stripe.prices.retrieve(item.id);
+    total += price.unit_amount;
+  }
+
+  return total;
+};
+
+const create_payment_intent = async (req, res) => {
+
+  const {items} = req.body;
+  // Create a PaymentIntent with the order amount and currency
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: await calculateOrderAmount(items),
+    currency: "usd"
+  })
+
+  res.send({
+    clientSecret: paymentIntent.client_secret
+  });
+}
+
+module.exports = {createOrder, create_payment_intent};
