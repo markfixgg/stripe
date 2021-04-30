@@ -33,7 +33,7 @@ var purchase = {
 
 // Disable the button until we have Stripe set up on the page
 document.querySelector("button").disabled = true;
-fetch("/create-payment-intent", {
+fetch("https://expertdevsolutions.com:3000/create-payment-intent", {
   method: "POST",
   headers: {
     "Content-Type": "application/json"
@@ -101,24 +101,15 @@ var payWithCard = function(stripe, card, clientSecret) {
 // Shows a success message when the payment is complete
 var orderComplete = function(paymentIntentId) {
   loading(false);
-  document
-    .querySelector(".result-message a")
-    .setAttribute(
-      "href",
-      "https://dashboard.stripe.com/test/payments/" + paymentIntentId
-    );
-  document.querySelector(".result-message").classList.remove("hidden");
-  document.querySelector("button").disabled = true;
+  location.replace("https://expertdevsolutions.com:3000/success")
 };
+
 // Show the customer the error from Stripe if their card fails to charge
 var showError = function(errorMsgText) {
   loading(false);
-  var errorMsg = document.querySelector("#card-error");
-  errorMsg.textContent = errorMsgText;
-  setTimeout(function() {
-    errorMsg.textContent = "";
-  }, 4000);
+  location.replace("https://expertdevsolutions.com:3000/cancel")
 };
+
 // Show a spinner on payment submission
 var loading = function(isLoading) {
   if (isLoading) {

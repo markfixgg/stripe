@@ -8,16 +8,8 @@
   </head>
   <body>
     <section>
-      <div class="product">
-        <img
-          id="product_img"
-          src=""
-          alt="image"
-        />
-        <div class="description">
-          <h3 id="product_name"></h3>
-          <h5 id="product_price"></h5>
-        </div>
+      <div id="section_container">
+
       </div>
       <button type="button" id="checkout-button">Checkout</button>
     </section>
@@ -46,16 +38,50 @@ function parseQuery(search) {
 
     const params = parseQuery(document.location.search);
     const json = JSON.parse(params.products);
-    const parsed = {...json[0], price: Math.round(json[0].price) * 100}
-    const product = parsed;
-  
-    const {currency, images, name, price, quantity} = product;
 
-    console.log(parsed)
+    for(item of json) {
+      const {currency, images, name, price, quantity} = item;
+      console.log(item)
 
-    document.getElementById("product_img").src=images;
-    document.getElementById("product_name").innerHTML = name;
-    document.getElementById("product_price").innerHTML = `$${price / 100}`; // $20.00
+        // <div class="product">
+        //   <img
+        //     id="product_img"
+        //     src=""
+        //     alt="image"
+        //   />
+        //   <div class="description">
+        //     <h3 id="product_name"></h3>
+        //     <h5 id="product_price"></h5>
+        //   </div>
+        // </div>
+
+
+      var container = document.createElement('div');
+      container.classList.add("product");
+      
+      var image = document.createElement('img');
+
+      image.setAttribute("src", images);
+      image.setAttribute("alt", "image");
+
+      var description = document.createElement('div');
+      description.classList.add("description");
+      
+      var h3 = document.createElement('h3');
+      var h5 = document.createElement('h5');
+      
+      h3.innerHTML = name;
+      h5.innerHTML = `$${price/100}`;
+
+      description.appendChild(h3);
+      description.appendChild(h5);
+
+      container.appendChild(image);
+      container.appendChild(description);
+
+
+      document.getElementById("section_container").appendChild(container);
+    }
 
 
     // Create an instance of the Stripe object with your publishable API key
@@ -63,12 +89,12 @@ function parseQuery(search) {
     var checkoutButton = document.getElementById("checkout-button");
 
     checkoutButton.addEventListener("click", async function () {
-      await fetch("http://my-vs.ru:3000/create-checkout-session", {
+      await fetch("https://expertdevsolutions.com:3000/create-checkout-session", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({items: [parsed]})
+        body: JSON.stringify({items: json})
       })
         .then(function (response) {
           return response.json();

@@ -15,18 +15,21 @@ section {
   display: flex;
   flex-direction: column;
   width: 400px;
-  height: 112px;
+  max-height: 1600px;
   border-radius: 6px;
   justify-content: space-between;
 }
 .product {
   display: flex;
+  border-bottom: 1px solid black;
 }
+
 .description {
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
+
 p {
   font-style: normal;
   font-weight: 500;
